@@ -1,0 +1,4 @@
+node_modules/
+package-lock.json
+notices.json
+index.js
