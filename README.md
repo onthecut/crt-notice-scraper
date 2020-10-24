@@ -11,9 +11,9 @@ npm install @onthecut/crt-notice-scraper
 ## API
 
 ```js
-import scraper from '@onthecut/crt-notice-scraper';
+import { getNotices } from '@onthecut/crt-notice-scraper';
 
-await notices.fetchSearchResults()
+await getNotices()
 // >
 // [ { fromDate: '30th October 2018 at 06:00',
 //     toDate: '30th June 2019 at 23:59 inclusive',
