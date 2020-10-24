@@ -11,24 +11,23 @@ npm install @onthecut/crt-notice-scraper
 ## API
 
 ```js
-import { getNotices } from '@onthecut/crt-notice-scraper';
+import {
+    getNotices,
+    getNotice
+} from '@onthecut/crt-notice-scraper';
 
-await getNotices()
-// >
-// [ { fromDate: '30th October 2018 at 06:00',
-//     toDate: '30th June 2019 at 23:59 inclusive',
-//     type: 'Advice',
-//     reason: 'Information',
-//     noticeUpdates:
-//      '26/03/2019 @ 17:59\n                        UPDATE: The mooring ...',
-//     description:
-//      'The Canal & River Trust is working with Hackney Council and ...',
-//     waterway: 'Lee Navigation',
-//     startsAt: 'Bridge 14, Eastway Road (A106)',
-//     endsAt: 'Bridge 14A, Newham Way' },
-//     ...
-// ]
+// Retreive all notice summaries (CRT Notice Search Results)
+const notices = await getNotices()
+
+// Get detailed information on individual notices
+const url = 'https://canalrivertrust.org.uk/notices/14494-boston-lock';
+const notice = await getNotice(url);
 ```
+
+## Related
+
+* [CRT Notices Website](https://canalrivertrust.org.uk/notices)
+* [CRT Open Data](https://data-canalrivertrust.opendata.arcgis.com/)
 
 ## Licence
 
