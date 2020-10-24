@@ -1,107 +1,139 @@
-import * as url from 'url';
-import fetch from 'axios';
-import * as cheerio from 'cheerio';
-import camelCase = require('camel-case');
+import * as puppeteer from "puppeteer";
 
-interface Notice {
-  waterway: string;
-  
+declare global {
+  interface Window {
+    crt: any;
+  }
 }
 
-const cleanDate = (text) => {
-	return text.replace(/ {1,}/g, ' ').replace(/\n/g, '').trim()
-}
+/**
+ * Options passed to chromium.launch(). Disables headless mode when DEBUG
+ * environment variable's set.
+ */
+const browserLaunchOptions = {
+  headless: process.env.DEBUG ? false : undefined,
+  slowMo: process.env.DEBUG ? 50 : undefined,
+};
 
-const parseNotice = (html) => {
-  const $ = cheerio.load(html)
+/**
+ * Base CRT Notices URL
+ */
+export const NOTICES_URL = "https://canalrivertrust.org.uk/notices";
 
-  const contentEl = $('.notice-content')
-
-  const names = contentEl.find('fieldset').toArray().map((fieldset) => {
-    return $(fieldset).children('.name').map((index, el) => {
-      return $(el).text().trim()
-    }).toArray()
-  })
-
-  const values = contentEl.find('fieldset').toArray().map((fieldset) => {
-    return $(fieldset).children('.value').map((index, el) => {
-      return $(el).text().trim()
-    }).toArray()
-  })
-
-  const out = {
-    waterway: undefined,
-    fromDate: undefined,
-    toDate: undefined
+/**
+ * Load and scrape data from a CRT Notice page given it's URL.
+ *
+ * Example:
+ *
+ *    const notice = await getNotice(
+ *      'https://canalrivertrust.org.uk/notices/18561-river-severn-carrington-road-bridge'
+ *    );
+ */
+export async function getNotice(url) {
+  if (!url) {
+    throw new Error("Missing Notice URL");
   }
 
-  names.forEach((nameBlock, outerIndex) => {
-    nameBlock.forEach((name, innerIndex) => {
-      if (outerIndex === 1) {
-        if (innerIndex === 0) {
-		  out.waterway = name
-		  return
-        } else {
-          innerIndex--
-        }
+  const browser = await puppeteer.launch(browserLaunchOptions);
+
+  // const context = await browser.newContext();
+
+  const page = await browser.newPage();
+  await page.goto(url);
+
+  const notice = await page.evaluate(() => {
+    const notice = {
+      title: (document.getElementsByClassName(
+        "text-header-headline"
+      )[0] as HTMLElement).innerText,
+      href: window.location.href,
+    };
+
+    for (const panel of Array.from(
+      document.getElementsByClassName("panel-contact")
+    )) {
+      const panelHeading = (panel.getElementsByClassName(
+        "heading"
+      )[0] as HTMLElement).innerText;
+      const panelHeadingLower = panelHeading.toLowerCase();
+
+      notice[panelHeadingLower] = {};
+
+      switch (panelHeadingLower) {
+        case "detail":
+        case "location":
+          for (const para of Array.from(panel.getElementsByTagName("p"))) {
+            let boldText = (para.children[0] as HTMLElement).innerText.trim();
+
+            // Remove ending ':'.
+            boldText = boldText.substring(0, boldText.length - 1);
+
+            const bodyText = para.innerText.substr(boldText.length).trim();
+
+            notice[panelHeadingLower][boldText] = bodyText;
+          }
+
+          break;
+
+        case "updates":
+        case "description":
+          break;
       }
-      out[camelCase(name)] = values[outerIndex][innerIndex]
+    }
+
+    return notice;
+  });
+
+  notice.id = new URL(notice.href).pathname.split("/")[2].split("-")[0];
+
+  await browser.close();
+
+  return notice;
+}
+
+/**
+ * Gather a list of all notice summaries from CRT Notices.
+ *
+ * Example:
+ *
+ *     (await getNotices()).forEach(notice => {
+ *       console.log(`${notice.name} - ${notice.href}`)
+ *     });
+ *
+ * Returns:
+ *
+ *     [
+ *       {
+ *         endAt: null
+ *         endDate: null,
+ *         headline: "Boston Lock",
+ *         noticeType: 7,
+ *         path: "/notices/14494-boston-lock",
+ *         startAt: null,
+ *         startDate: "2018-11-01T00:00:00",
+ *         towpathClosed: false
+ *       }
+ *     ]
+ *
+ */
+export async function getNotices() {
+  const browser = await puppeteer.launch(browserLaunchOptions);
+  // const context = await browser.newContext();
+
+  const page = await browser.newPage();
+  await page.goto(NOTICES_URL);
+
+  const notices = (
+    await page.evaluate(() => {
+      return window.crt.component[5].data;
     })
-  })
+  ).map((notice) => {
+    notice.href = new URL(notice.path, NOTICES_URL).href;
 
-  out.fromDate = out.fromDate ? out.fromDate.replace(/ {1,}/g, ' ').replace(/\n/g, '') : out.fromDate
-  out.toDate = out.toDate ? out.toDate.replace(/ {1,}/g, ' ').replace(/\n/g, '') : out.toDate
+    return notice;
+  });
 
-  return out
-}
+  await browser.close();
 
-const fetchNotice = (url) => {
-  return fetch(url)
-    .then(res => res.data)
-    .then(parseNotice)
-}
-
-const parseSearchResults = (html) => {
-	const $ = cheerio.load(html)
-
-	return $($('.search-results-list-table').children()[0]).children().map((index, resultEl) => {
-		const type = $(resultEl).find('img').attr('alt')
-		const name = $(resultEl).find('.search-result-title a').text().replace('»', '').trim()
-		const href = $(resultEl).find('.search-result-title a').attr('href').trim()
-		const match = $(resultEl).find('.search-result-url').text().replace(/\n/g, '')
-								.match(/Waterway: (.+)From Date:(.+)To Date:(.+)/)
-
-		return {
-			name,
-			type,
-			href: url.resolve('https://canalrivertrust.org.uk/', href),
-			waterway: match[1].trim(),
-			fromDate: cleanDate(match[2]),
-			toDate: cleanDate(match[3])
-		}
-	}).toArray()
-}
-
-const fetchSearchResults = (
-	url = 'https://canalrivertrust.org.uk/notices/results/page/1?region=-1&datefrom=&dateto=&itemcount=10000&Search=Search&waterways=-1',
-	extended = true
-) => {
-	return fetch(url)
-	.then(res => res.data)
-	.then(parseSearchResults)
-	.then((results) => {
-		if (!extended) {
-			return results
-		}
-		return Promise.all(
-			results.map(({href}) => fetchNotice(href))
-		)
-	})
-}
-
-module.exports = {
-  parseNotice,
-  fetchNotice,
-  parseSearchResults,
-  fetchSearchResults
+  return notices;
 }
