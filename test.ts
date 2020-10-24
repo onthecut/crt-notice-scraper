@@ -1,4 +1,4 @@
-import test from "tape";
+import * as test from "tape";
 import { CRTNoticeSummary, getNotice, getNotices } from ".";
 
 let firstNotice : CRTNoticeSummary;
