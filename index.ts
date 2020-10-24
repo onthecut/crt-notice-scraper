@@ -7,18 +7,20 @@ declare global {
 }
 
 /**
+ * Base CRT Notices URL
+ */
+export const NOTICES_URL = "https://canalrivertrust.org.uk/notices";
+
+
+/**
  * Options passed to chromium.launch(). Disables headless mode when DEBUG
  * environment variable's set.
  */
-const browserLaunchOptions = {
+export const defaultBrowserLaunchOptions = {
   headless: process.env.DEBUG ? false : undefined,
   slowMo: process.env.DEBUG ? 50 : undefined,
 };
 
-/**
- * Base CRT Notices URL
- */
-export const NOTICES_URL = "https://canalrivertrust.org.uk/notices";
 
 /**
  * Load and scrape data from a CRT Notice page given it's URL.
@@ -29,14 +31,12 @@ export const NOTICES_URL = "https://canalrivertrust.org.uk/notices";
  *      'https://canalrivertrust.org.uk/notices/18561-river-severn-carrington-road-bridge'
  *    );
  */
-export async function getNotice(url) {
+export async function getNotice(url, browserLaunchOptions = defaultBrowserLaunchOptions) {
   if (!url) {
     throw new Error("Missing Notice URL");
   }
 
   const browser = await puppeteer.launch(browserLaunchOptions);
-
-  // const context = await browser.newContext();
 
   const page = await browser.newPage();
   await page.goto(url);
@@ -116,9 +116,8 @@ export async function getNotice(url) {
  *     ]
  *
  */
-export async function getNotices() {
+export async function getNotices(browserLaunchOptions = defaultBrowserLaunchOptions) {
   const browser = await puppeteer.launch(browserLaunchOptions);
-  // const context = await browser.newContext();
 
   const page = await browser.newPage();
   await page.goto(NOTICES_URL);
