@@ -1,7 +1,7 @@
-import * as test from "tape";
-import { getNotice, getNotices } from ".";
+import test from "tape";
+import { CRTNoticeSummary, getNotice, getNotices } from ".";
 
-let firstNotice;
+let firstNotice : CRTNoticeSummary;
 
 test("getNotices", async (t) => {
   const notices = await getNotices();

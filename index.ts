@@ -1,9 +1,29 @@
-import * as puppeteer from "puppeteer";
+import puppeteer from "puppeteer";
 
 declare global {
   interface Window {
     crt: any;
   }
+}
+
+export interface CRTNoticeSummary {
+  path: string,
+  href: string,
+  [key:string]: Object | string;
+}
+
+export interface CRTNotice {
+  title: string,
+  href: string,
+
+  detail: CRTNoticeBlock,
+  location: CRTNoticeBlock,
+
+  [key:string]: CRTNoticeBlock | string;
+}
+
+export interface CRTNoticeBlock {
+  [key:string]: Object | string;
 }
 
 /**
@@ -16,7 +36,7 @@ export const NOTICES_URL = "https://canalrivertrust.org.uk/notices";
  * Options passed to chromium.launch(). Disables headless mode when DEBUG
  * environment variable's set.
  */
-export const defaultBrowserLaunchOptions = {
+export const defaultBrowserLaunchOptions = <puppeteer.LaunchOptions>{
   headless: process.env.DEBUG ? false : undefined,
   slowMo: process.env.DEBUG ? 50 : undefined,
 };
@@ -31,7 +51,7 @@ export const defaultBrowserLaunchOptions = {
  *      'https://canalrivertrust.org.uk/notices/18561-river-severn-carrington-road-bridge'
  *    );
  */
-export async function getNotice(url, browserLaunchOptions = defaultBrowserLaunchOptions) {
+export async function getNotice(url : string, browserLaunchOptions = defaultBrowserLaunchOptions) : Promise<CRTNotice> {
   if (!url) {
     throw new Error("Missing Notice URL");
   }
@@ -41,8 +61,8 @@ export async function getNotice(url, browserLaunchOptions = defaultBrowserLaunch
   const page = await browser.newPage();
   await page.goto(url);
 
-  const notice = await page.evaluate(() => {
-    const notice = {
+  const notice : CRTNotice = await page.evaluate(() => {
+    const notice = <CRTNotice> {
       title: (document.getElementsByClassName(
         "text-header-headline"
       )[0] as HTMLElement).innerText,
@@ -116,7 +136,7 @@ export async function getNotice(url, browserLaunchOptions = defaultBrowserLaunch
  *     ]
  *
  */
-export async function getNotices(browserLaunchOptions = defaultBrowserLaunchOptions) {
+export async function getNotices(browserLaunchOptions = defaultBrowserLaunchOptions) : Promise<Array<CRTNoticeSummary>> {
   const browser = await puppeteer.launch(browserLaunchOptions);
 
   const page = await browser.newPage();
@@ -126,7 +146,7 @@ export async function getNotices(browserLaunchOptions = defaultBrowserLaunchOpti
     await page.evaluate(() => {
       return window.crt.component[5].data;
     })
-  ).map((notice) => {
+  ).map((notice : CRTNoticeSummary) => {
     notice.href = new URL(notice.path, NOTICES_URL).href;
 
     return notice;

@@ -4,6 +4,8 @@
   "description": "Canal and River Trust (CRT) Notice Scraper",
   "main": "index.js",
   "dependencies": {
+    "@types/puppeteer": "^3.0.2",
+    "@types/tape": "^4.13.0",
     "puppeteer": "^5.4.0"
   },
   "devDependencies": {
