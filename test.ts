@@ -1,7 +1,7 @@
-import * as test from "tape";
+import test from "tape";
 import { CRTNoticeSummary, getNotice, getNotices } from ".";
 
-let firstNotice : CRTNoticeSummary;
+let firstNotice: CRTNoticeSummary;
 
 test("getNotices", async (t) => {
   const notices = await getNotices();
@@ -31,13 +31,13 @@ test("getNotices", async (t) => {
 
 test("getNotice", async (t) => {
   const notice = await getNotice(firstNotice.href);
-  
-  t.ok('title' in notice);
-  t.ok('href' in notice);
-  t.ok('detail' in notice);
-  t.ok('location' in notice);
-  t.ok('updates' in notice);
-  t.ok('description' in notice);
-  t.ok('id' in notice)
+
+  t.ok("title" in notice);
+  t.ok("href" in notice);
+  t.ok("detail" in notice);
+  t.ok("location" in notice);
+  t.ok("updates" in notice);
+  t.ok("description" in notice);
+  t.ok("id" in notice);
   t.end();
 });
