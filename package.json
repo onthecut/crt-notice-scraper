@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@types/puppeteer": "^5.4.0",
-    "puppeteer": "^9.0.0"
+    "puppeteer": "^10.0.0"
   },
   "devDependencies": {
     "@types/tape": "^4.13.0",
