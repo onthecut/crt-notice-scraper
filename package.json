@@ -2,7 +2,6 @@
   "name": "@onthecut/crt-notice-scraper",
   "version": "2.1.2",
   "description": "Canal and River Trust (CRT) Notice Scraper",
-  "main": "index.js",
   "dependencies": {
     "@types/puppeteer": "^5.4.0",
     "puppeteer": "^11.0.0"
