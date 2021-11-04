@@ -147,7 +147,7 @@ export async function getNotices(
 
   const notices = (
     await page.evaluate(() => {
-      return window.crt.component[6].data;
+      return window.crt.component[7].data;
     })
   ).map((notice: CRTNoticeSummary) => {
     notice.href = new URL(notice.path, NOTICES_URL).href;
