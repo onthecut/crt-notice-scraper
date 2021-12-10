@@ -1,4 +1,4 @@
-import * as puppeteer from "puppeteer";
+import puppeteer from "puppeteer";
 
 declare global {
   interface Window {
@@ -64,18 +64,20 @@ export async function getNotice(
 
   const notice: CRTNotice = await page.evaluate(() => {
     const notice = <CRTNotice>{
-      title: (document.getElementsByClassName(
-        "text-header-headline"
-      )[0] as HTMLElement).innerText,
+      title: (
+        document.getElementsByClassName(
+          "text-header-headline"
+        )[0] as HTMLElement
+      ).innerText,
       href: window.location.href,
     };
 
     for (const panel of Array.from(
       document.getElementsByClassName("panel-contact")
     )) {
-      const panelHeading = (panel.getElementsByClassName(
-        "heading"
-      )[0] as HTMLElement).innerText;
+      const panelHeading = (
+        panel.getElementsByClassName("heading")[0] as HTMLElement
+      ).innerText;
       const panelHeadingLower = panelHeading.toLowerCase();
 
       notice[panelHeadingLower] = {};
