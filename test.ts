@@ -1,10 +1,10 @@
 import * as test from "tape";
 import { CRTNoticeSummary, getNotice, getNotices } from ".";
 
-let firstNotice: CRTNoticeSummary;
+let notices: Array<CRTNoticeSummary>;
 
 test("getNotices", async (t) => {
-  const notices = await getNotices();
+  notices = await getNotices();
 
   t.ok(Array.isArray(notices));
   t.ok(notices.length > 0);
@@ -24,20 +24,32 @@ test("getNotices", async (t) => {
     t.ok(key in notices[0]);
   }
 
-  firstNotice = notices[0];
-
   t.end();
 });
 
 test("getNotice", async (t) => {
-  const notice = await getNotice(firstNotice.href);
+  const elements = [
+    "title",
+    "href",
+    "detail",
+    "location",
+    "updates",
+    "description",
+    "id",
+  ];
 
-  t.ok("title" in notice);
-  t.ok("href" in notice);
-  t.ok("detail" in notice);
-  t.ok("location" in notice);
-  t.ok("updates" in notice);
-  t.ok("description" in notice);
-  t.ok("id" in notice);
-  t.end();
+  for (let noticeSummary of notices) {
+    let a = await getNotice(noticeSummary.href);
+    let hasAllElements = true;
+
+    for (let element of elements) {
+      if (element in a == false) {
+        hasAllElements = false;
+      }
+    }
+
+    if (hasAllElements) {
+      return t.end();
+    }
+  }
 });
