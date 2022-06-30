@@ -3,3 +3,4 @@ package-lock.json
 notices.json
 index.js
 test.js
+*.d.ts
