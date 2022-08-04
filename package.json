@@ -6,7 +6,7 @@
   "types": "index.d.ts",
   "dependencies": {
     "@types/puppeteer": "^5.4.0",
-    "puppeteer": "^15.2.0"
+    "puppeteer": "^16.0.0"
   },
   "devDependencies": {
     "@types/tape": "^4.13.2",
