@@ -1,6 +1,6 @@
 {
   "name": "@onthecut/crt-notice-scraper",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "Canal and River Trust (CRT) Notice Scraper",
   "main": "index.js",
   "types": "index.d.ts",
