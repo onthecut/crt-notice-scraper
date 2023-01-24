@@ -5,7 +5,7 @@
   "main": "index.js",
   "types": "index.d.ts",
   "dependencies": {
-    "@types/puppeteer": "^5.4.0",
+    "@types/puppeteer": "^7.0.4",
     "puppeteer": "^19.0.0"
   },
   "devDependencies": {
