@@ -144,10 +144,15 @@ export async function getNotices(
 
   const page = await browser.newPage();
   await page.goto(NOTICES_URL);
+  
+  // wait for everything to load
+  await page.waitForSelector('.lower-footer-panel');
+
 
   const notices = (
     await page.evaluate(() => {
-      return window.crt.component[9].data;
+      let key = Object.keys(window.crt.component).find(key => "data" in window.crt.component[key]) as any;
+      return window.crt.component[key].data;
     })
   ).map((notice: CRTNoticeSummary) => {
     notice.href = new URL(notice.path, NOTICES_URL).href;
